@@ -23,3 +23,7 @@
 .product__description {
     text-align: center;
 }
+
+.product-detail__image {
+    max-width: 500px;
+}
