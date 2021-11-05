@@ -1,11 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const mongoose = require('mongoose');
 const adminRoutes = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 const rootDir = require('./util/path');
 const errorController = require('./controllers/error');
-const { mongoConnect } = require('./util/database');
 const User = require('./models/user');
 
 const app = express();
@@ -17,9 +17,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(rootDir, 'public')));
 
 app.use((req, res, next) => {
-    User.findById('6182f54fe3692f1c854b78f0')
+    User.findById('618563eff76c716e9231696c')
         .then(user => {
-            req.user = new User(user.name, user.email, user.cart, user._id);
+            req.user = user;
             next();
         })
         .catch(console.log);
@@ -30,6 +30,21 @@ app.use(shopRoutes);
 
 app.use(errorController.get404);
 
-mongoConnect(() => {
-    app.listen(3000);
-});
+mongoose.connect('mongodb+srv://stu:j9wcshEiKzKWyhJ4@cluster0.ukzuz.mongodb.net/shop?retryWrites=true&w=majority')
+    .then(result => {
+        User.findOne()
+            .then(user => {
+                if (!user) {
+                    const user = new User({
+                        name: 'Stuart',
+                        email: 'stuhuggins@gmail.com',
+                        cart: {
+                            items: []
+                        }
+                    });
+                    user.save();
+                }
+            });
+        app.listen(3000);
+    })
+    .catch(console.log);
